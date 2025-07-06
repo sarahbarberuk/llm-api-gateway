@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
+from schemas import RewriteRequest, SummarizeRequest 
+
 app = FastAPI()
 
 # Add this block right after creating the FastAPI app
@@ -17,10 +19,9 @@ REWRITE_URL = "http://rewrite:8000/rewrite"
 SUMMARIZE_URL = "http://summarize:8000/summarize"
 
 @app.post("/rewrite")
-async def rewrite_proxy(request: Request):
-    payload = await request.json()
+async def rewrite_proxy(payload: RewriteRequest):
     async with httpx.AsyncClient() as client:
-        response = await client.post(REWRITE_URL, json=payload)
+        response = await client.post(REWRITE_URL, json=payload.dict())
 
     # Debug logging:
     print("Status:", response.status_code)
@@ -38,8 +39,7 @@ async def rewrite_proxy(request: Request):
 
 
 @app.post("/summarize")
-async def summarize_proxy(request: Request):
-    payload = await request.json()
+async def summarize_proxy(payload: SummarizeRequest):
     async with httpx.AsyncClient() as client:
-        response = await client.post(SUMMARIZE_URL, json=payload)
+        response = await client.post(SUMMARIZE_URL, json=payload.dict())
     return response.json()
